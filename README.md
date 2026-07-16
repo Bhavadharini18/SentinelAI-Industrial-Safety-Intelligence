@@ -195,6 +195,30 @@ tests/
 ```
 
 ---
+## Client
+
+```bash
+cd client
+npm install
+npm run dev
+```
+
+## Server
+
+```bash
+cd server
+npm install
+npm run dev
+```
+
+## AI Engine
+
+```bash
+cd intelligence-engine
+pip install -r requirements.txt
+python app.py
+```
+---
 
 ## Design Philosophy
 
