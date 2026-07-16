@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:6.0
+    container_name: sentinel_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - sentinel_net
+
+  intelligence-engine:
+    build:
+      context: ../intelligence-engine
+      dockerfile: ../deployment/Dockerfile.ai
+    container_name: sentinel_ai
+    ports:
+      - "8000:8000"
+    networks:
+      - sentinel_net
+    restart: always
+
+  server:
+    build:
+      context: ../server
+      dockerfile: ../deployment/Dockerfile.server
+    container_name: sentinel_server
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MONGO_URI=mongodb://mongodb:27017/sentinelai
+      - JWT_SECRET=sentinel_ai_super_secret_jwt_key_998877
+      - PYTHON_SERVICE_URL=http://intelligence-engine:8000
+      - NODE_ENV=production
+    depends_on:
+      - mongodb
+      - intelligence-engine
+    networks:
+      - sentinel_net
+    restart: always
+
+  client:
+    build:
+      context: ../client
+      dockerfile: ../deployment/Dockerfile.client
+    container_name: sentinel_client
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+    networks:
+      - sentinel_net
+    restart: always
+
+volumes:
+  mongo_data:
+
+networks:
+  sentinel_net:
+    driver: bridge
